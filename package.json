@@ -1,0 +1,36 @@
+{
+	"name": "sbahn-berlin-tweets",
+	"description": "Fetch & parse @SBahnBerlin tweets about the operating status of S-Bahn Berlin.",
+	"version": "1.0.0",
+	"main": "index.js",
+	"files": [
+		"index.js",
+		"parse.js",
+		"example.js"
+	],
+	"keywords": [
+		"sbahnberlin",
+		"s-bahn",
+		"berlin",
+		"public transport",
+		"transit"
+	],
+	"author": "Jannis R <mail@jannisr.de>",
+	"homepage": "https://github.com/derhuerst/sbahn-berlin-tweets",
+	"repository": "derhuerst/sbahn-berlin-tweets",
+	"bugs": "https://github.com/derhuerst/sbahn-berlin-tweets/issues",
+	"license": "ISC",
+	"engines": {
+		"node": ">=12"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"tap-min": "^2.0.0",
+		"tape": "^4.10.1"
+	},
+	"scripts": {
+		"test": "env NODE_ENV=dev node test/index.js | tap-min",
+		"prepublishOnly": "npm test"
+	}
+}
