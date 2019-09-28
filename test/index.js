@@ -301,6 +301,9 @@ const ersatzverkehr = {
 // - https://mobile.twitter.com/SBahnBerlin/status/1168503702451306497
 // - https://mobile.twitter.com/SBahnBerlin/status/1168390595230031873
 // - "Info: https://t.co/a67QIkpfi6", e.g. in 1178001865998585858
+// - 1178001865998585858
+// - 1178000391625232384 –> effect: 'no-service'
+// - 1177998897110802432 -> cause: 'construction-works'
 
 test('ignores irrelevant messages', (t) => {
 	const none = {cause: null, effect: null, affected: [], runsOnlyBetween: null, useLines: [], stations: []}

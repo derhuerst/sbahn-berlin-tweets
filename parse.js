@@ -24,8 +24,11 @@ const findReplacementService = (chunks) => {
 	.filter(isStation)
 	.map(({station}) => station)
 
-	if (stations.length !== 2) return null // todo
-	return {from: stations[0], to: stations[1]}
+	const isWeird = stations.length !== 2 // todo
+	return {
+		from: isWeird ? stations[0] : null,
+		to: isWeird ? stations[1] : null
+	}
 }
 
 const runsOnlyBetween = (chunks) => {
@@ -63,6 +66,7 @@ const cause = (chunks) => {
 	if (n.includes(' signalstorung ')) return 'signalling-failure'
 	if (n.includes(' storung am zug ')) return 'train-failure'
 	if (s.includes(' polizeieinsatz ')) return 'police-operation'
+	if (n.includes(' bauarbeiten ')) return 'construction-works'
 	return null
 }
 
@@ -115,7 +119,7 @@ const affectedStations = (chunks) => {
 }
 
 const isUseLinesSentence = ({type, normalized}) => {
-	return type === 'plain' && /nutzen\s+sie\s/.test(normalized)
+	return type === 'plain' && /(^|\s)nutzen($|\s)/g.test(normalized)
 }
 const useLines = (chunks) => {
 	const useLines = chunks.flatMap((chunk, i) => {
