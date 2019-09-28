@@ -1,6 +1,7 @@
 'use strict'
 
 const uniqBy = require('lodash/uniqBy')
+const takeWhile = require('lodash/takeWhile')
 const slugg = require('slugg')
 const {
 	splitSentences,
@@ -26,6 +27,30 @@ const findReplacementService = (chunks) => {
 
 	if (stations.length !== 2) return null // todo
 	return {from: stations[0], to: stations[1]}
+}
+
+const runsOnlyBetween = (chunks) => {
+	const i = chunks.findIndex((chunk, i) => {
+		if (!isPlainWithNormalized(/fahrt zwischen\s*$/g)(chunk)) return false
+		return !sentenceAt(chunks, i).some(isPlainWithErsatzverkehr)
+	})
+	if (i < 0) return null
+
+	const lines = sentenceAt(chunks, i)
+	.filter(({type, line}) => type === 'hashtag' && !!line)
+	.map(({line}) => line)
+
+	const restOfSentence = takeWhile(chunks.slice(i), isNotSentenceBoundary)
+	const stations = restOfSentence
+	.filter(isStation)
+	.map(({station}) => station)
+
+	if (stations.length !== 2) return null // todo
+	return {
+		lines,
+		from: stations[0],
+		to: stations[1]
+	}
 }
 
 const cause = (chunks) => {
@@ -76,8 +101,39 @@ const affectedLines = (chunks) => {
 	return uniqBy(lines, 'id')
 }
 
+const affectedStations = (chunks) => {
+	// remove "use lines" & "please change" sentences
+	chunks = removeSentences(chunks, isUseLinesOrPleaseChangeSentence)
+
+	const stations = chunks
+	.filter(({type, station}, i, chunks) => {
+		if (type !== 'hashtag' || !station) return false
+		const {type: prevType, normalized: prevNormalized} = chunks[i - 1] || {}
+		return prevType === 'plain' && /in\s*$/g.test(prevNormalized)
+	})
+	.map(({station}) => station)
+	return uniqBy(stations, 'id')
+}
+
 const isUseLinesSentence = ({type, normalized}) => {
 	return type === 'plain' && /nutzen\s+sie\s/.test(normalized)
+}
+const useLines = (chunks) => {
+	const useLines = chunks.flatMap((chunk, i) => {
+		return isUseLinesSentence(chunk) ? sentenceAt(chunks, i) : []
+	})
+
+	return useLines.reduce((lines, chunk) => {
+		if (chunk.type === 'hashtag' && chunk.line) return [...lines, chunk.line]
+		if (chunk.type === 'plain') {
+			const lineRegex = /(?<=\s)[A-Z]*\d+(?=[\s,]|\.?$)/g
+			const newLines = Array.from(chunk.content.matchAll(lineRegex))
+			.filter(t => !!findLine(t))
+			.map(t => findLine(t))
+			return [...lines, ...newLines]
+		}
+		return lines
+	}, [])
 }
 
 const formatLine = l => ['line', l.name]
@@ -91,11 +147,20 @@ const parse = ({text}) => {
 	.map(findStationHashtags)
 	// console.error(chunks)
 
+	const between = runsOnlyBetween(chunks)
 	return {
 		cause: cause(chunks),
 		effect: effect(chunks),
-		affected: affectedLines(chunks).map(formatLine)
+		affected: affectedLines(chunks).map(formatLine),
+		stations: affectedStations(chunks).map(formatStation),
+		useLines: useLines(chunks).map(formatLine),
+		runsOnlyBetween: between && {
+			from: formatStation(between.from),
+			to: formatStation(between.to),
+			lines: between.lines.map(formatLine)
+		}
 	}
 }
 
-module.exports = fetch
+parse.useLines = useLines
+module.exports = parse
