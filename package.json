@@ -28,6 +28,8 @@
 		"lodash": "^4.17.15",
 		"multilingual-stemmer": "^1.0.2",
 		"slugg": "^1.2.1",
+		"twit": "^2.2.11",
+		"twitter-tokens": "^1.0.3",
 		"vbb-find-stations": "^3.0.1",
 		"vbb-lines": "^4.8.0"
 	},

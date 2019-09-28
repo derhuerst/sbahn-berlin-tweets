@@ -1,7 +1,8 @@
 'use strict'
 
 const test = require('tape')
-const parse = require('..')
+const parseTweet = require('../lib/parse-raw-tweet')
+const parse = require('../parse')
 const {splitSentences, normalizeContent} = require('../lib/utils')
 const {useLines} = parse
 
@@ -9,6 +10,58 @@ const opt = {
 	formatLine: l => l.name,
 	formatStation: s => s.id
 }
+
+test('fetch: parseTweet', (t) => {
+	const parsed = parseTweet({
+		id_str: '1178000391625232384',
+		full_text: '#S8 Nacht 28./29.09. ca. 1 Uhr - ca. 6.45 Uhr #Treptower_Park&lt;&gt;#Schönhauser_Allee kein Zugverkehr. Bitte zwischen #Treptower_Park und Schönhauser_Allee die Züge der Linien #S41 und #S42 nutzen.\nInfo: https://t.co/a67QIkpfi6',
+		entities: {
+			hashtags: [
+				{text: 'S8', indices: [0, 3]},
+				{text: 'Treptower_Park', indices: [46, 61]},
+				{text: 'Schönhauser_Allee', indices: [69, 87]},
+				{text: 'Treptower_Park', indices: [120, 135]},
+				{text: 'S41', indices: [178, 182]},
+				{text: 'S42', indices: [187, 191]}
+			],
+			user_mentions: [],
+			urls: [
+				{
+					expanded_url: 'https://sbahn.berlin/fahren/fahrplanaenderungen/linien-filter/S8/?tabs=tbc-l4',
+					indices: [206, 229]
+				}
+			]
+		}
+	})
+	t.deepEqual(parsed, {
+		id: '1178000391625232384',
+		quoted: null,
+		text: [
+			{ type: 'hashtag', content: 'S8' },
+			{
+				type: 'plain',
+				content: ' Nacht 28./29.09. ca. 1 Uhr - ca. 6.45 Uhr '
+			},
+			{ type: 'hashtag', content: 'Treptower_Park' },
+			{ type: 'plain', content: '&lt;&gt;' },
+			{ type: 'hashtag', content: 'Schönhauser_Allee' },
+			{ type: 'plain', content: ' kein Zugverkehr. Bitte zwischen ' },
+			{ type: 'hashtag', content: 'Treptower_Park' },
+			{
+				type: 'plain',
+				content: ' und Schönhauser_Allee die Züge der Linien '
+			},
+			{ type: 'hashtag', content: 'S41' },
+			{ type: 'plain', content: ' und ' },
+			{ type: 'hashtag', content: 'S42' },
+			{
+				type: 'plain',
+				content: ' nutzen.\nInfo: https://t.co/a67QIkpfi6'
+			}
+		]
+	})
+	t.end()
+})
 
 test('splitSentences', (t) => {
 	const boundary = {type: 'sentence-boundary'}
@@ -247,6 +300,7 @@ const ersatzverkehr = {
 // - https://mobile.twitter.com/SBahnBerlin/status/1168906229919506434
 // - https://mobile.twitter.com/SBahnBerlin/status/1168503702451306497
 // - https://mobile.twitter.com/SBahnBerlin/status/1168390595230031873
+// - "Info: https://t.co/a67QIkpfi6", e.g. in 1178001865998585858
 
 test('ignores irrelevant messages', (t) => {
 	const none = {cause: null, effect: null, affected: [], runsOnlyBetween: null, useLines: [], stations: []}
