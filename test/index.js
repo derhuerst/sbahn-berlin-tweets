@@ -5,6 +5,11 @@ const parse = require('..')
 const {splitSentences, normalizeContent} = require('../lib/utils')
 const {useLines} = parse
 
+const opt = {
+	formatLine: l => l.name,
+	formatStation: s => s.id
+}
+
 test('splitSentences', (t) => {
 	const boundary = {type: 'sentence-boundary'}
 
@@ -245,67 +250,53 @@ const ersatzverkehr = {
 
 test('ignores irrelevant messages', (t) => {
 	const none = {cause: null, effect: null, affected: [], runsOnlyBetween: null, useLines: [], stations: []}
-	t.deepEqual(parse(bisMorgen), none)
-	t.deepEqual(parse(übergabe), none)
-	t.deepEqual(parse(job), none)
+	t.deepEqual(parse(bisMorgen, opt), none)
+	t.deepEqual(parse(übergabe, opt), none)
+	t.deepEqual(parse(job, opt), none)
 	t.end()
 })
 
 test('parses "notbremse" messages', (t) => {
-	t.deepEqual(parse(notbremse), {
+	t.deepEqual(parse(notbremse, opt), {
 		cause: 'emergency-brake',
 		effect: 'disruptions',
-		affected: [
-			['line', 'S42'],
-			['line', 'S45']
-		],
+		affected: ['S42', 'S45'],
 		runsOnlyBetween: null,
-		stations: ['s-sonnenallee'], // todo: use ID
+		stations: ['900000077106'], // S Sonnenallee
 		useLines: []
 	})
 	t.end()
 })
 test('parses "notarzteinsatz" messages', (t) => {
-	t.deepEqual(parse(notarztSavignyplatz), {
+	t.deepEqual(parse(notarztSavignyplatz, opt), {
 		cause: 'medical-emergency',
 		effect: 'disruptions',
-		affected: [
-			['line', 'S3'],
-			['line', 'S5'],
-			['line', 'S7'],
-			['line', 'S9']
-		],
+		affected: ['S3', 'S5', 'S7', 'S9'],
 		runsOnlyBetween: null,
-		stations: ['savignyplatz'], // todo: use ID
+		// todo: this should actually be 900000024203 (S Savignyplatz)
+		stations: ['900000024204'], // Savignyplatz
 		useLines: []
 	})
 	t.end()
 })
 
 test('parses "weichenstörung" messages', (t) => {
-	t.deepEqual(parse(s7Weichenstörung), {
+	t.deepEqual(parse(s7Weichenstörung, opt), {
 		cause: 'switch-failure',
 		effect: 'skipped-stops',
-		affected: [
-			['line', 'S7']
-		],
+		affected: ['S7'],
 		runsOnlyBetween: null,
-		stations: ['s-olympiastadion'], // todo: use ID
+		stations: ['900000025321'], // S Olympiastadion
 		// todo: line every 10 minutes between Ahrensfelde & Westkreuz
-		useLines: [
-			['line', 'S3'],
-			['line', 'S9']
-		]
+		useLines: ['S3', 'S9']
 	})
 	t.end()
 })
 test('parses "ende der weichenstörung" messages', (t) => {
-	t.deepEqual(parse(s7VerkehrtWieder), {
+	t.deepEqual(parse(s7VerkehrtWieder, opt), {
 		cause: null,
 		effect: 'normal-operation',
-		affected: [
-			['line', 'S7']
-		],
+		affected: ['S7'],
 		runsOnlyBetween: null,
 		stations: [],
 		useLines: []
@@ -314,113 +305,88 @@ test('parses "ende der weichenstörung" messages', (t) => {
 })
 
 test('parses "polizeieinsatz" messages', (t) => {
-	t.deepEqual(parse(plänterwaldPolizeieinsatz), {
+	t.deepEqual(parse(plänterwaldPolizeieinsatz, opt), {
 		cause: 'police-operation',
 		effect: 'skipped-stops',
-		affected: [
-			['line', 'S8'],
-			['line', 'S9'],
-			['line', 'S85']
-		],
+		affected: ['S8', 'S9', 'S85'],
 		runsOnlyBetween: null,
-		stations: ['s-planterwald'], // todo: use ID
+		stations: ['900000191002'], // S Plänterwald
 		useLines: []
 	})
 	t.end()
 })
 test('parses "ende des polizeieinsatzes" messages', (t) => {
-	t.deepEqual(parse(plänterwaldPolizeieinsatzVorbei), {
+	t.deepEqual(parse(plänterwaldPolizeieinsatzVorbei, opt), {
 		cause: 'police-operation',
 		effect: 'normal-operation',
-		affected: [
-			['line', 'S8'],
-			['line', 'S9'],
-			['line', 'S85']
-		],
+		affected: ['S8', 'S9', 'S85'],
 		runsOnlyBetween: null,
-		stations: ['s-planterwald'],
+		stations: ['900000191002'], // S Plänterwald
 		useLines: []
 	})
 	t.end()
 })
 
 test('parses "signalstörung" messages', (t) => {
-	t.deepEqual(parse(ringSignalstörung), {
+	t.deepEqual(parse(ringSignalstörung, opt), {
 		cause: 'signalling-failure',
 		effect: 'disruptions', // todo: between Schöneweide & Spindlersfeld
 		affected: [
-			['line', 'S45'],
-			['line', 'S46'],
-			['line', 'S47'],
-			['line', '47'] // the tweet is wrong
+			'S45', 'S46', 'S47',
+			'47' // the tweet is wrong
 		],
 		runsOnlyBetween: {
-			from: 's-schoneweide',
-			to: 's-spindlersfeld',
-			lines: [['line', '47']]
+			from: '900000192001', // S Schöneweide
+			to: '900000180003', // S Spindlersfeld
+			lines: ['47']
 		},
-		stations: ['s-kollnische-heide'], // todo: use ID
+		stations: ['900000077155'], // S Köllnische Heide
 		useLines: []
 	})
 	t.end()
 })
 test('parses "ende der signalstörung" messages', (t) => {
-	t.deepEqual(parse(ringSignalstörungVorbei), {
+	t.deepEqual(parse(ringSignalstörungVorbei, opt), {
 		cause: 'signalling-failure',
 		effect: 'normal-operation',
-		affected: [
-			['line', 'S45'],
-			['line', 'S46'],
-			['line', 'S47']
-		],
+		affected: ['S45', 'S46', 'S47'],
 		runsOnlyBetween: null,
-		stations: ['s-kollnische-heide'],
+		stations: ['900000077155'], // S Köllnische Heide
 		useLines: []
 	})
 	t.end()
 })
 
 test('parses "störung am zug" messages', (t) => {
-	t.deepEqual(parse(ringStörungAmZug), {
+	t.deepEqual(parse(ringStörungAmZug, opt), {
 		cause: 'train-failure',
 		effect: 'disruptions',
-		affected: [
-			['line', 'S41'],
-			['line', 'S42'],
-			['line', 'S45'],
-			['line', 'S46'],
-			['line', 'S47']
-		],
+		affected: ['S41', 'S42', 'S45', 'S46', 'S47'],
 		runsOnlyBetween: null,
-		stations: ['s-beusselstr'], // todo: use ID
+		stations: ['900000020202'], // S Beusselstr.
 		useLines: []
 	})
 	t.end()
 })
 test('parses "ende der störung am zug" messages', (t) => {
-	t.deepEqual(parse(ringStörungAmZugVorbei), {
+	t.deepEqual(parse(ringStörungAmZugVorbei, opt), {
 		cause: 'train-failure',
 		effect: 'normal-operation',
 		affected: [], // todo: pick up lines from quoted event
 		runsOnlyBetween: null,
-		stations: ['s-beusselstr'],
+		stations: ['900000020202'], // S Beusselstr.
 		useLines: []
 	})
 	t.end()
 })
 
 test('parses "ersatzverkehr" messages', (t) => {
-	t.deepEqual(parse(ersatzverkehr), {
+	t.deepEqual(parse(ersatzverkehr, opt), {
 		cause: null,
 		effect: 'replacement-service',
-		affected: [
-			['line', 'S7']
-		],
+		affected: ['S7'],
 		runsOnlyBetween: null,
-		useLines: [
-			['line', 'RE1'],
-			['line', 'RE7']
-		],
+		useLines: ['RE1', 'RE7'],
 		stations: []
 		// todo: between Westkreuz & Potsdam Hbf
 	})

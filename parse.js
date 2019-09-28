@@ -2,7 +2,6 @@
 
 const uniqBy = require('lodash/uniqBy')
 const takeWhile = require('lodash/takeWhile')
-const slugg = require('slugg')
 const {
 	splitSentences,
 	normalizeContent,
@@ -136,16 +135,19 @@ const useLines = (chunks) => {
 	}, [])
 }
 
-const formatLine = l => ['line', l.name]
-const formatStation = s => slugg(s.name) // todo: ID
-const parse = ({text}) => {
+const defaults = {
+	formatLine: l => ({id: l.id, name: l.name}),
+	formatStation: s => ({id: s.id, name: s.name})
+}
+const parse = ({text}, opt = {}) => {
+	const {formatLine, formatStation} = {...defaults, ...opt}
+
 	const chunks = text
 	.reduce(splitSentences, [])
 	.map(normalizeContent)
 	.map(stemContent)
 	.map(findLineHashtags)
 	.map(findStationHashtags)
-	// console.error(chunks)
 
 	const between = runsOnlyBetween(chunks)
 	return {

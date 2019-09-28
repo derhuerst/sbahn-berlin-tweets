@@ -50,10 +50,20 @@ console.log(parse({
 {
 	cause: 'switch-failure',
 	effect: 'skipped-stops',
-	affected: [['line', 'S7']],
-	runsOnlyBetween: null,
-	stations: ['s-olympiastadion'],
-	useLines: [['line', 'S3'], ['line', 'S9']]
+	affected: [
+		// from the `vbb-lines` npm package
+		{id: '10162_109', name: 'S7'}
+	],
+	stations: [
+		// from the `vbb-stations` npm package
+		{id: '900000025321', name: 'S Olympiastadion'}
+	],
+	useLines: [
+		// from the `vbb-lines` npm package
+		{id: '10148_109', name: 'S3'},
+		{id: '10170_109', name: 'S9'}
+	],
+	runsOnlyBetween: null
 }
 ```
 
