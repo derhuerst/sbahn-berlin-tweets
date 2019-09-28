@@ -2,7 +2,60 @@
 
 const test = require('tape')
 const parse = require('..')
-const {splitSentences, normalizeContent, useLines} = parse
+const {splitSentences, normalizeContent} = require('../lib/utils')
+const {useLines} = parse
+
+test('splitSentences', (t) => {
+	const boundary = {type: 'sentence-boundary'}
+
+	const split = [
+		{type: 'plain', content: 'Bis 06.09. (Fr), ca. 1.30 Uhr zwischen '},
+		{type: 'hashtag', content: 'Westkreuz'},
+		{type: 'plain', content: ' und '},
+		{type: 'hashtag', content: 'Potsdam_Hbf'},
+		{type: 'plain', content: ' Ersatzverkehr. Nutzen Sie RE1 und RE7. Infos:'},
+		{type: 'url', content: 'https://sbahn.berlin/fahren/s1/?tabs=tbc-l32'}
+	].reduce(splitSentences, [])
+	t.deepEqual(split, [
+		{type: 'plain', content: 'Bis 06.09. (Fr), ca. 1.30 Uhr zwischen '},
+		{type: 'hashtag', content: 'Westkreuz'},
+		{type: 'plain', content: ' und '},
+		{type: 'hashtag', content: 'Potsdam_Hbf'},
+		{type: 'plain', content: ' Ersatzverkehr.'}, boundary,
+		{type: 'plain', content: ' Nutzen Sie RE1 und RE7.'}, boundary,
+		{type: 'plain', content: ' Infos:'},
+		{type: 'url', content: 'https://sbahn.berlin/fahren/s1/?tabs=tbc-l32'}
+	])
+
+	const split2 = [
+		{type: 'plain', content: 'Die S7 verkehrt nur zwischen '},
+		{type: 'hashtag', content: 'Ahrensfelde'},
+		{type: 'plain', content: ' <> '},
+		{type: 'hashtag', content: 'Westkreuz'},
+		{type: 'plain', content: '. Der 10-Minutentakt kann nur … angeboten werden.'}
+	].reduce(splitSentences, [])
+	t.deepEqual(split2, [
+		{type: 'plain', content: 'Die S7 verkehrt nur zwischen '},
+		{type: 'hashtag', content: 'Ahrensfelde'},
+		{type: 'plain', content: ' <> '},
+		{type: 'hashtag', content: 'Westkreuz'},
+		{type: 'plain', content: '.'}, boundary,
+		{type: 'plain', content: ' Der 10-Minutentakt kann nur … angeboten werden.'}
+	])
+
+	t.end()
+})
+
+test('useLines', (t) => {
+	const chunks = [
+		{type: 'plain', content: 'Nutzen Sie am 1.3. die Linien 17, RE1 und RE7.'},
+		{type: 'sentence-boundary'},
+		{type: 'plain', content: ' 123'}
+	].map(normalizeContent)
+
+	t.deepEqual(useLines(chunks).map(l => l.name), ['17', 'RE1', 'RE7'])
+	t.end()
+})
 
 const bisMorgen = {
 	id: '1169339350401708032',

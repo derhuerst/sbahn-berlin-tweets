@@ -6,6 +6,7 @@
 	"files": [
 		"index.js",
 		"parse.js",
+		"lib",
 		"example.js"
 	],
 	"keywords": [
@@ -24,6 +25,10 @@
 		"node": ">=12"
 	},
 	"dependencies": {
+		"multilingual-stemmer": "^1.0.2",
+		"slugg": "^1.2.1",
+		"vbb-find-stations": "^3.0.1",
+		"vbb-lines": "^4.8.0"
 	},
 	"devDependencies": {
 		"tap-min": "^2.0.0",
