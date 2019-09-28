@@ -23,7 +23,38 @@ npm install sbahn-berlin-tweets
 ## Usage
 
 ```js
-todo
+const parse = require('parse-sbahn-berlin-tweets/parse')
+
+console.log(parse({
+	id: '1169246704291524608',
+	text: [
+		{type: 'hashtag', content: 'S7'},
+		{type: 'plain', content: ': Wegen einer Weichenstörung in '},
+		{type: 'hashtag', content: 'Olympiastadion'},
+		{type: 'plain', content: ' verkehrt die S7 nur zwischen '},
+		{type: 'hashtag', content: 'Ahrensfelde'},
+		{type: 'plain', content: ' <> '},
+		{type: 'hashtag', content: 'Westkreuz'},
+		{type: 'plain', content: '. Der 10-Minutentakt kann nur zwischen Ahrensfelde <> '},
+		{type: 'hashtag', content: 'Charlottenburg'},
+		{type: 'plain', content: ' angeboten werden. Von/nach Olympiastadion/Spandau nutzen Sie bitte die Züge der '},
+		{type: 'hashtag', content: 'S3'},
+		{type: 'plain', content: ' und '},
+		{type: 'hashtag', content: 'S9'},
+		{type: 'plain', content: '.'}
+	]
+}))
+```
+
+```js
+{
+	cause: 'switch-failure',
+	effect: 'skipped-stops',
+	affected: [['line', 'S7']],
+	runsOnlyBetween: null,
+	stations: ['s-olympiastadion'],
+	useLines: [['line', 'S3'], ['line', 'S9']]
+}
 ```
 
 
