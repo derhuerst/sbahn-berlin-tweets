@@ -68,6 +68,12 @@ console.log(parse({
 ```
 
 
+## Related
+
+- [`augment-vbb-hafas`](https://github.com/derhuerst/augment-vbb-hafas) – Augment [VBB HAFAS](https://npmjs.com/package/vbb-hafas) responses with realtime data from other channels.
+- [`vbb-disruptions`](https://github.com/derhuerst/vbb-disruptions) – Disruptions in VBB public transport.
+
+
 ## Contributing
 
 If you have a question or need support using `sbahn-berlin-tweets`, please double-check your code and setup first. If you think you have found a bug or want to propose a feature, refer to [the issues page](https://github.com/derhuerst/sbahn-berlin-tweets/issues).

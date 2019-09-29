@@ -1,7 +1,7 @@
 {
 	"name": "sbahn-berlin-tweets",
 	"description": "Fetch & parse @SBahnBerlin tweets about the operating status of S-Bahn Berlin.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"main": "index.js",
 	"files": [
 		"index.js",
