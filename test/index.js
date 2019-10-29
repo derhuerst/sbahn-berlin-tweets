@@ -4,6 +4,7 @@ const test = require('tape')
 const parseTweet = require('../lib/parse-raw-tweet')
 const parse = require('../parse')
 const {splitSentences, normalizeContent} = require('../lib/utils')
+const filterQuoted = require('../lib/filter-quoted')
 const {useLines} = parse
 
 const opt = {
@@ -101,6 +102,16 @@ test('splitSentences', (t) => {
 		{type: 'plain', content: ' Der 10-Minutentakt kann nur … angeboten werden.'}
 	])
 
+	t.end()
+})
+
+test('filterQuoted', (t) => {
+	const a = {a: true}
+	const b = {b: true, quoted: a}
+	const c = {c: true}
+	const d = {d: true, quoted: c}
+
+	t.deepEqual(filterQuoted([a, b, c, d]), [b, d])
 	t.end()
 })
 

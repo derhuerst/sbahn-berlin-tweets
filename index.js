@@ -4,13 +4,14 @@ const Twitter = require('twit')
 const tokens = require('twitter-tokens')
 const parseRawTweet = require('./lib/parse-raw-tweet')
 const parseTweet = require('./parse')
+const filterQuoted = require('./lib/filter-quoted')
 
 const ACCOUNT = 'SBahnBerlin'
 
 const twitter = new Twitter(tokens)
 
 const fetchTweets = async (count = 5) => {
-	const {data: tweets} = await twitter.get('statuses/user_timeline', {
+	const {data: raw} = await twitter.get('statuses/user_timeline', {
 		screen_name: ACCOUNT,
 		count,
 		trim_user: true,
@@ -19,9 +20,8 @@ const fetchTweets = async (count = 5) => {
 		tweet_mode: 'extended'
 	})
 
-	return tweets
-	.map(parseRawTweet)
-	.map(t => parseTweet(t))
+	const tweets = raw.map(parseRawTweet).map(t => parseTweet(t))
+	return filterQuoted(tweets)
 }
 
 module.exports = fetchTweets
