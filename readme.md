@@ -22,8 +22,34 @@ npm install sbahn-berlin-tweets
 
 ## Usage
 
+### fetching & parsing tweets
+
 ```js
-const parse = require('parse-sbahn-berlin-tweets/parse')
+const fetchAndParseTweets = require('sbahn-berlin-tweets')
+
+const [tweet] = await fetchAndParseTweets(1, {
+	formatLine: l => l.id,
+	formatStation: s => s.id
+})
+console.log(tweet)
+```
+
+```js
+{
+	id: '1169225032700239872',
+	cause: 'medical-emergency',
+	effect: 'disruptions',
+	affected: ['S3', 'S5', 'S7', 'S9'],
+	runsOnlyBetween: null,
+	stations: ['900000024204'], // Savignyplatz
+	useLines: []
+}
+```
+
+### parsing tweets
+
+```js
+const parse = require('sbahn-berlin-tweets/parse')
 
 console.log(parse({
 	id: '1169246704291524608',

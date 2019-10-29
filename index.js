@@ -10,7 +10,7 @@ const ACCOUNT = 'SBahnBerlin'
 
 const twitter = new Twitter(tokens)
 
-const fetchTweets = async (count = 5) => {
+const fetchTweets = async (count = 5, opt = {}) => {
 	const {data: raw} = await twitter.get('statuses/user_timeline', {
 		screen_name: ACCOUNT,
 		count,
@@ -22,7 +22,7 @@ const fetchTweets = async (count = 5) => {
 
 	const tweets = raw
 	.map(parseRawTweet)
-	.map(t => ({...parseTweet(t), account: ACCOUNT}))
+	.map(t => ({...parseTweet(t, opt), account: ACCOUNT}))
 	return filterQuoted(tweets)
 }
 
