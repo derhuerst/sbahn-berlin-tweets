@@ -20,7 +20,9 @@ const fetchTweets = async (count = 5) => {
 		tweet_mode: 'extended'
 	})
 
-	const tweets = raw.map(parseRawTweet).map(t => parseTweet(t))
+	const tweets = raw
+	.map(parseRawTweet)
+	.map(t => ({...parseTweet(t), account: ACCOUNT}))
 	return filterQuoted(tweets)
 }
 
