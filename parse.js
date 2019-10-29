@@ -143,7 +143,7 @@ const defaults = {
 	formatLine: l => ({id: l.id, name: l.name}),
 	formatStation: s => ({id: s.id, name: s.name})
 }
-const parse = ({text}, opt = {}) => {
+const parse = ({id, quoted, text}, opt = {}) => {
 	const {formatLine, formatStation} = {...defaults, ...opt}
 
 	const chunks = text
@@ -154,7 +154,8 @@ const parse = ({text}, opt = {}) => {
 	.map(findStationHashtags)
 
 	const between = runsOnlyBetween(chunks)
-	return {
+	const res = {
+		id,
 		cause: cause(chunks),
 		effect: effect(chunks),
 		affected: affectedLines(chunks).map(formatLine),
@@ -166,6 +167,10 @@ const parse = ({text}, opt = {}) => {
 			lines: between.lines.map(formatLine)
 		}
 	}
+
+	if (quoted) res.quoted = parse(quoted, opt)
+
+	return res
 }
 
 parse.useLines = useLines

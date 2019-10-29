@@ -307,14 +307,15 @@ const ersatzverkehr = {
 
 test('ignores irrelevant messages', (t) => {
 	const none = {cause: null, effect: null, affected: [], runsOnlyBetween: null, useLines: [], stations: []}
-	t.deepEqual(parse(bisMorgen, opt), none)
-	t.deepEqual(parse(übergabe, opt), none)
-	t.deepEqual(parse(job, opt), none)
+	t.deepEqual(parse(bisMorgen, opt), {...none, id: bisMorgen.id})
+	t.deepEqual(parse(übergabe, opt), {...none, id: übergabe.id})
+	t.deepEqual(parse(job, opt), {...none, id: job.id})
 	t.end()
 })
 
 test('parses "notbremse" messages', (t) => {
 	t.deepEqual(parse(notbremse, opt), {
+		id: notbremse.id,
 		cause: 'emergency-brake',
 		effect: 'disruptions',
 		affected: ['S42', 'S45'],
@@ -326,6 +327,7 @@ test('parses "notbremse" messages', (t) => {
 })
 test('parses "notarzteinsatz" messages', (t) => {
 	t.deepEqual(parse(notarztSavignyplatz, opt), {
+		id: notarztSavignyplatz.id,
 		cause: 'medical-emergency',
 		effect: 'disruptions',
 		affected: ['S3', 'S5', 'S7', 'S9'],
@@ -339,6 +341,7 @@ test('parses "notarzteinsatz" messages', (t) => {
 
 test('parses "weichenstörung" messages', (t) => {
 	t.deepEqual(parse(s7Weichenstörung, opt), {
+		id: s7Weichenstörung.id,
 		cause: 'switch-failure',
 		effect: 'skipped-stops',
 		affected: ['S7'],
@@ -351,6 +354,8 @@ test('parses "weichenstörung" messages', (t) => {
 })
 test('parses "ende der weichenstörung" messages', (t) => {
 	t.deepEqual(parse(s7VerkehrtWieder, opt), {
+		id: s7VerkehrtWieder.id,
+		quoted: parse(s7VerkehrtWieder.quoted, opt),
 		cause: null,
 		effect: 'normal-operation',
 		affected: ['S7'],
@@ -363,6 +368,7 @@ test('parses "ende der weichenstörung" messages', (t) => {
 
 test('parses "polizeieinsatz" messages', (t) => {
 	t.deepEqual(parse(plänterwaldPolizeieinsatz, opt), {
+		id: plänterwaldPolizeieinsatz.id,
 		cause: 'police-operation',
 		effect: 'skipped-stops',
 		affected: ['S8', 'S9', 'S85'],
@@ -374,6 +380,8 @@ test('parses "polizeieinsatz" messages', (t) => {
 })
 test('parses "ende des polizeieinsatzes" messages', (t) => {
 	t.deepEqual(parse(plänterwaldPolizeieinsatzVorbei, opt), {
+		id: plänterwaldPolizeieinsatzVorbei.id,
+		quoted: parse(plänterwaldPolizeieinsatzVorbei.quoted, opt),
 		cause: 'police-operation',
 		effect: 'normal-operation',
 		affected: ['S8', 'S9', 'S85'],
@@ -386,6 +394,7 @@ test('parses "ende des polizeieinsatzes" messages', (t) => {
 
 test('parses "signalstörung" messages', (t) => {
 	t.deepEqual(parse(ringSignalstörung, opt), {
+		id: ringSignalstörung.id,
 		cause: 'signalling-failure',
 		effect: 'disruptions', // todo: between Schöneweide & Spindlersfeld
 		affected: [
@@ -404,6 +413,8 @@ test('parses "signalstörung" messages', (t) => {
 })
 test('parses "ende der signalstörung" messages', (t) => {
 	t.deepEqual(parse(ringSignalstörungVorbei, opt), {
+		id: ringSignalstörungVorbei.id,
+		quoted: parse(ringSignalstörungVorbei.quoted, opt),
 		cause: 'signalling-failure',
 		effect: 'normal-operation',
 		affected: ['S45', 'S46', 'S47'],
@@ -416,6 +427,7 @@ test('parses "ende der signalstörung" messages', (t) => {
 
 test('parses "störung am zug" messages', (t) => {
 	t.deepEqual(parse(ringStörungAmZug, opt), {
+		id: ringStörungAmZug.id,
 		cause: 'train-failure',
 		effect: 'disruptions',
 		affected: ['S41', 'S42', 'S45', 'S46', 'S47'],
@@ -427,6 +439,8 @@ test('parses "störung am zug" messages', (t) => {
 })
 test('parses "ende der störung am zug" messages', (t) => {
 	t.deepEqual(parse(ringStörungAmZugVorbei, opt), {
+		id: ringStörungAmZugVorbei.id,
+		quoted: parse(ringStörungAmZugVorbei.quoted, opt),
 		cause: 'train-failure',
 		effect: 'normal-operation',
 		affected: [], // todo: pick up lines from quoted event
@@ -439,6 +453,7 @@ test('parses "ende der störung am zug" messages', (t) => {
 
 test('parses "ersatzverkehr" messages', (t) => {
 	t.deepEqual(parse(ersatzverkehr, opt), {
+		id: ersatzverkehr.id,
 		cause: null,
 		effect: 'replacement-service',
 		affected: ['S7'],
